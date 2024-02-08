@@ -6,10 +6,9 @@ from typing import Optional
 
 load_dotenv()
 
-openai.api_key = os.getenv("OPENAI_KEY")
-
+openai.api_key = "API KEY"
+# print("API KEY: ",os.getenv("OPENAI_KEY"))
 app = typer.Typer()
-
 
 @app.command()
 def interactive_chat(
@@ -24,7 +23,7 @@ def interactive_chat(
 ):
     """Interactive CLI tool to chat with ChatGPT."""
     typer.echo(
-        "Starting interactive chat with ChatGPT. Type 'exit' to end the session."
+        "Starting interactive chat with ChatGPT. Type 'EOF' on a new line to submit your input, type 'exit' to end the session."
     )
 
     messages = []
@@ -34,10 +33,17 @@ def interactive_chat(
             prompt = text
             text = None
         else:
-            prompt = typer.prompt("You")
+            prompt_lines = []
+            typer.echo("You: (Type your message. Type 'EOF' on a new line when done)")
+            while True:
+                line = input()
+                if line == "EOF":
+                    break
+                prompt_lines.append(line)
+            prompt = "\n".join(prompt_lines)
 
         messages.append({"role": "user", "content": prompt})
-        if prompt == "exit":
+        if prompt.lower() == "exit":
             typer.echo("ChatGPT: Goodbye!")
             break
 
@@ -50,7 +56,6 @@ def interactive_chat(
 
         typer.echo(f'ChatGPT: {response["choices"][0]["message"]["content"]}')
         messages.append(response["choices"][0]["message"])
-
 
 if __name__ == "__main__":
     app()
